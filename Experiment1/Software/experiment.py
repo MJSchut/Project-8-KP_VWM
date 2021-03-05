@@ -46,10 +46,10 @@ class Experiment:
         self.kb_space = libinput.Keyboard(keylist=['space'], timeout=None)
         self.kb_input = libinput.Keyboard(keylist=['a', 'l'], timeout=None)
 
-    def start_experiment(self):
+    def start_experiment(self, override_trials=None):
         """Run the entire experiment."""
         self._play_intro_screen()
-        for x in range(constants.NTRIALS):
+        for x in range(constants.NTRIALS if override_trials is None else override_trials):
             self._play_trial(x)
 
     def _play_intro_screen(self):
@@ -165,8 +165,12 @@ class Experiment:
 
     def __wait_for_trial_response(self):
         starttime = libtime.get_time()
-        k, t = self.kb_input.get_key()
+        k, t = self.kb_input.get_key(flush=True)
         libtime.pause(np.random.uniform(800, 1400))
 
         self.responseKey = k
         self.responseTime = libtime.get_time() - starttime
+
+if __name__ == "__main__":
+    experiment = Experiment()
+    experiment.start_experiment(override_trials=5)

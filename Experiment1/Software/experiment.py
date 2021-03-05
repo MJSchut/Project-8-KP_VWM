@@ -37,9 +37,12 @@ class Experiment:
         amt = constants.SET_SIZES[-1]
 
         for i in range(amt):
-            rect = visual.Rect(pygaze.expdisplay)
-            rect.width = constants.SQUAREWIDTH
-            rect.height = constants.SQUAREHEIGHT
+            rect = visual.Rect(pygaze.expdisplay,
+                               width=constants.SQUAREWIDTH,
+                               height=constants.SQUAREHEIGHT,
+                               fillColor=None,
+                               lineWidth=10,
+                               lineColor=[1, 1, 1])
             self.experimentscreen.screen.append(rect)
 
     def __set_up_input(self):

@@ -15,25 +15,46 @@ import numpy as np
 class Experiment:
     """List of functions to smooth out the code in the main.py file."""
 
-    def __init__(self):
+    def __init__(self, subject_info=None):
         """Run a bunch of one-shot private functions."""
+        if subject_info is None:
+            self.subject = 'test'
+        self.subject = subject_info.get('Participant', 'error')
         self.__create_screens()
         self.__create_stimuli()
         self.__set_up_input()
+        self.__set_up_output()
 
     def __create_screens(self):
-        print ("Initializing display")
+        print("Initializing display")
         self.disp = libscreen.Display()
 
-        print ("Initializing screens")
-        self.introscreen = libscreen.Screen()
-        self.introscreen.draw_text(
-            "Druk op de spatiebalk om verder te gaan.",
+        print("Initializing screens")
+        self.instruction_screen = libscreen.Screen()
+        self.instruction_screen.draw_text(
+            "INSTRUCTIES\n\n"
+            "Je krijgt op ieder scherm een aantal balkjes te zien.\n"
+            "Daarna verschijnt er kort een scherm met ruis.\n"
+            "Tot slot krijg je nogmaals het scherm met balkjes te zien.\n\n"
+            "Na een moment verschijnt er een rood vierkant rond een van de balkjes.\n "
+            "Geef met de 'a' en 'l' toets aan of het balkje veranderd is.\n\n"
+            "Druk op 'a' als het balkje NIET veranderd is.\n "
+            "Druk op 'l' als het balkje wel veranderd is.\n"
+            "Je krijgt nu eerst {} oefenrondes met feedback aan het eind van iedere ronde.\n\n\n"
+            "-- druk op de spatiebalk om te beginnen --".format(constants.NPRACTICE_TRIALS),
             fontsize=24)
-        self.experimentscreen = libscreen.Screen()
+
+        self.intro_screen = libscreen.Screen()
+        self.intro_screen.draw_text(
+            "INSTRUCTIES\n\n"
+            "Nu volgen de echte trials.\n"
+            "Je krijgt {} trials in totaal.\n\n\n"
+            "-- Druk op de spatiebalk om verder te gaan --".format(constants.NTRIALS),
+            fontsize=24)
+        self.experiment_screen = libscreen.Screen()
 
     def __create_stimuli(self):
-        print ("Initializing stimuli")
+        print("Initializing stimuli")
         amt = constants.SET_SIZES[-1]
 
         for i in range(amt):
@@ -43,32 +64,44 @@ class Experiment:
                                fillColor=None,
                                lineWidth=10,
                                lineColor=[1, 1, 1])
-            self.experimentscreen.screen.append(rect)
+            self.experiment_screen.screen.append(rect)
 
     def __set_up_input(self):
         self.kb_space = libinput.Keyboard(keylist=['space'], timeout=None)
         self.kb_input = libinput.Keyboard(keylist=['a', 'l'], timeout=None)
 
+    def __set_up_output(self):
+        # Fair warning, if you plan to use a LOT of trials. Don't use the python list like
+        # I did here. Use a queue or something similar.
+        self.output = [["participant, response key, response time, changed stimulus, correct answer, practice trial, "
+                        "set_size"]]
+
+    def start_practice(self, override_trials=None):
+        self._play_text_screen(self.instruction_screen)
+        for x in range(constants.NPRACTICE_TRIALS if override_trials is None else override_trials):
+            self._play_trial(x, practice=True)
+
     def start_experiment(self, override_trials=None):
         """Run the entire experiment."""
-        self._play_intro_screen()
+        self._play_text_screen(self.intro_screen)
         for x in range(constants.NTRIALS if override_trials is None else override_trials):
             self._play_trial(x)
 
-    def _play_intro_screen(self):
-        self.disp.fill(self.introscreen)
+    def _play_text_screen(self, this_screen):
+        self.disp.fill(this_screen)
         self.disp.show()
         self.kb_space.get_key()
 
-    def _play_trial(self, trialcounter):
+    def _play_trial(self, trialcounter, practice=False):
         t1, t2, t3, t4 = constants.PAUSES
-        stimulusContainer = self.experimentscreen.screen[:]
+        stimulus_container = self.experiment_screen.screen[:]
+
         # background is first stimulus
         set_size = np.random.choice(constants.SET_SIZES) + 1
         change_trial = True
         if np.random.random_sample() < 0.5:
             change_trial = False
-        self.experimentscreen.screen = self.experimentscreen.screen[0:set_size]
+        self.experiment_screen.screen = self.experiment_screen.screen[0:set_size]
 
         self.responseKey = None
         self.responseTime = None
@@ -76,7 +109,7 @@ class Experiment:
         self._prep_mask()
         self._scramble_stimuli()
 
-        print ("\tStarting trial %s" % trialcounter)
+        print("\tStarting trial %s" % trialcounter)
         self.__show_empty_screen(t1)
         self.__show_experiment_screen(t2)
         self.__show_mask(t3)
@@ -89,9 +122,20 @@ class Experiment:
         self.__show_experiment_screen(0)
         self.__wait_for_trial_response()
 
-        print ("\tFinished trial %s" % trialcounter)
+        print("\tFinished trial %s" % trialcounter)
 
-        self.experimentscreen.screen = stimulusContainer[:]
+        self.experiment_screen.screen = stimulus_container[:]
+
+        trial_correct = (self.responseKey == 'a' and not change_trial) or \
+                        (self.responseKey == 'l' and change_trial)
+
+        self.output.append([self.subject,
+                           self.responseKey,
+                           self.responseTime,
+                           trial_correct,
+                           change_trial,
+                           practice,
+                           set_size])
 
     def __show_empty_screen(self, duration):
         self.disp.fill()
@@ -119,7 +163,7 @@ class Experiment:
             libtime.pause(duration)
 
     def __show_experiment_screen(self, duration):
-        self.disp.fill(self.experimentscreen)
+        self.disp.fill(self.experiment_screen)
         self.disp.show()
         if duration > 0:
             libtime.pause(duration)
@@ -127,7 +171,7 @@ class Experiment:
     def _scramble_stimuli(self):
         rhophi = []
 
-        for rect in self.experimentscreen.screen[1:]:
+        for rect in self.experiment_screen.screen[1:]:
             while True:
                 rho = np.random.choice(constants.BAR_RHOS)
                 phi = np.random.choice(constants.BAR_PHIS)
@@ -153,7 +197,7 @@ class Experiment:
         return randomrect
 
     def _random_rect(self):
-        return np.random.choice(self.experimentscreen.screen[1:])
+        return np.random.choice(self.experiment_screen.screen[1:])
 
     def __add_selection_rect(self, randomrect):
         selectionRect = visual.Rect(pygaze.expdisplay,
@@ -164,7 +208,7 @@ class Experiment:
                                     lineColor=[1, -1, -1],
                                     pos=randomrect.pos)
 
-        self.experimentscreen.screen.append(selectionRect)
+        self.experiment_screen.screen.append(selectionRect)
 
     def __wait_for_trial_response(self):
         starttime = libtime.get_time()
@@ -173,6 +217,7 @@ class Experiment:
 
         self.responseKey = k
         self.responseTime = libtime.get_time() - starttime
+
 
 if __name__ == "__main__":
     experiment = Experiment()

@@ -9,7 +9,7 @@ class InitSubject:
     """Initalizes a dialog box and stores the info in a dict."""
 
     def __init__(self):
-        """Öpen dialogbox, use .expInfo dict to retrieve info."""
+        """Open dialogbox, use .expInfo dict to retrieve info."""
         print ("\twaiting for subject info...")
 
         self.expInfo = {

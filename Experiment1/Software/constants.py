@@ -22,6 +22,7 @@ EYELINKCALBEEP = False
 DUMMYMODE = True
 
 # Experiment constants
+NPRACTICE_TRIALS = 10
 NTRIALS = 100
 SET_SIZES = [2, 3, 4, 6, 8]
 BAR_FEATURES = ['ori', 'colors']

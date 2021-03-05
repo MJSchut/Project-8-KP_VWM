@@ -6,3 +6,5 @@
 .idea/
 .vs/
 .vscode/
+venv/
+__pycache__/

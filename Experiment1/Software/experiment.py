@@ -165,8 +165,8 @@ class Experiment:
 
     def __wait_for_trial_response(self):
         starttime = libtime.get_time()
-        # k, t = self.kb_input.get_key()
+        k, t = self.kb_input.get_key()
         libtime.pause(np.random.uniform(800, 1400))
 
-        self.responseKey = 'A'
+        self.responseKey = k
         self.responseTime = libtime.get_time() - starttime

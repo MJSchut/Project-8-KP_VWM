@@ -1,0 +1,11 @@
+# files to ignore
+*.pyc
+.coverage
+
+# folders to ignore
+.idea/
+.vs/
+.vscode/
+venv/
+__pycache__/
+Experiment1/data/

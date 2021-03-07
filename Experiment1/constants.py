@@ -23,7 +23,8 @@ DUMMYMODE = True
 
 # Experiment constants
 NPRACTICE_TRIALS = 10
-NTRIALS = 100
+NTRIALS = 10
+NBREAK_TRIALS = 5
 SET_SIZES = [2, 3, 4, 6, 8]
 BAR_FEATURES = ['ori', 'colors']
 BAR_ORI = [0, 30, 60, 90, 120, 150]

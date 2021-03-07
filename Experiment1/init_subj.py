@@ -34,7 +34,7 @@ class InitSubject:
         )
 
         if dlg.OK:
-            file_name = "{}.json".format(self.expInfo.get('Participant'))
+            file_name = "ppt_data_{}.json".format(self.expInfo.get('Participant'))
             make_dir(constants.DATADIR)
             with open(os.path.join(constants.DATADIR, file_name), "w") as outfile:
                 json.dump(self.expInfo, outfile)

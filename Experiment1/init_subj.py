@@ -1,9 +1,14 @@
 """@author: Martijn Schut."""
 
 import time
+import json
+import os
+
+from dir_creator import make_dir
+import constants
+
 from psychopy import gui
 from psychopy import core
-
 
 class InitSubject:
     """Initalizes a dialog box and stores the info in a dict."""
@@ -29,7 +34,10 @@ class InitSubject:
         )
 
         if dlg.OK:
-            pass
+            file_name = "{}.json".format(self.expInfo.get('Participant'))
+            make_dir(constants.DATADIR)
+            with open(os.path.join(constants.DATADIR, file_name), "w") as outfile:
+                json.dump(self.expInfo, outfile)
         else:
             core.quit()
 

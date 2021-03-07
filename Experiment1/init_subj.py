@@ -10,6 +10,7 @@ import constants
 from psychopy import gui
 from psychopy import core
 
+
 class InitSubject:
     """Initalizes a dialog box and stores the info in a dict."""
 
@@ -19,10 +20,11 @@ class InitSubject:
 
         self.expInfo = {
             'Participant': '001',
-            'Gender': ['Male', 'Female'],
+            'Gender': ['M', 'F', 'NB'],
             'Age': 50,
             'Researcher': 'EO',
             'Group': ['PT', 'HC'],
+            'Overwrite old data': ['No', 'Yes'],
             'date': time.strftime("%d/%m/%Y")
         }
 
@@ -36,7 +38,12 @@ class InitSubject:
         if dlg.OK:
             file_name = "ppt_data_{}.json".format(self.expInfo.get('Participant'))
             make_dir(constants.DATADIR)
-            with open(os.path.join(constants.DATADIR, file_name), "w") as outfile:
+            file_location = os.path.join(constants.DATADIR, file_name)
+
+            if os.path.isfile(file_location) and self.expInfo.get('Overwrite old data') != 'Yes':
+                print("deze proefpersoon bestaat al, programma wordt afgesloten")
+
+            with open(file_location, "w") as outfile:
                 json.dump(self.expInfo, outfile)
         else:
             core.quit()

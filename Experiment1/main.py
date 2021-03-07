@@ -12,6 +12,6 @@ experiment = Experiment(infoSubject.expInfo)
 print ("Preparations are complete!")
 
 print ("Starting experiment")
-experiment.start_practice(3)
-experiment.start_experiment(5)
+experiment.start_practice()
+experiment.start_experiment()
 print ("Experiment is complete")

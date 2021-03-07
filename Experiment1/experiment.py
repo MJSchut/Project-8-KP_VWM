@@ -49,8 +49,10 @@ class Experiment:
         self.intro_screen.draw_text(
             "INSTRUCTIES\n\n"
             "Nu volgen de echte trials.\n"
+            "Je hoeft nu niet meer na iedere trial op de spatiebalk te drukken\n"
+            "Probeer snel en correct te antwoorden, iedere {} trials krijg je de kans voor een pauze.\n"
             "Je krijgt {} trials in totaal.\n\n\n"
-            "-- Druk op de spatiebalk om verder te gaan --".format(constants.NTRIALS),
+            "-- Druk op de spatiebalk om verder te gaan --".format(constants.NBREAK_TRIALS, constants.NTRIALS),
             fontsize=24)
 
         self.end_screen = libscreen.Screen()
@@ -92,21 +94,29 @@ class Experiment:
                         "set_size"]]
 
     def start_practice(self, override_trials=None):
-        self._play_text_screen(self.instruction_screen)
+        self._play_screen_until_spacebar_press(self.instruction_screen)
+
+        # add 1 to set size since the background counts as 1 stimulus
         for x in range(constants.NPRACTICE_TRIALS if override_trials is None else override_trials):
-            self._play_trial(x, practice=True)
+            self._play_trial(x, [x + 1 for x in constants.PRACTICE_SET_SIZES], practice=True)
 
     def start_experiment(self, override_trials=None):
         """Run the entire experiment."""
-        self._play_text_screen(self.intro_screen)
+        set_size_list = np.repeat(constants.SET_SIZES, np.ceil(constants.NTRIALS/len(constants.SET_SIZES)))
+        np.random.shuffle(set_size_list)
+
+        # add 1 to set size since the background counts as 1 stimulus
+        set_size_list = [x + 1 for x in set_size_list]
+
+        self._play_screen_until_spacebar_press(self.intro_screen)
         for x in range(constants.NTRIALS if override_trials is None else override_trials):
-            self._play_trial(x)
+            self._play_trial(x, set_size_list)
 
             if x > 0 and x % constants.NBREAK_TRIALS == 0 and x != constants.NTRIALS - 1:
                 self._take_a_break(x)
 
         self.__serialize_data_to_csv()
-        self._play_text_screen(self.end_screen)
+        self._play_screen_until_spacebar_press(self.end_screen)
 
     def _take_a_break(self, trials_done):
         self.__serialize_data_to_csv()
@@ -116,10 +126,10 @@ class Experiment:
             "PAUZE\n\n"
             "Je hebt even de tijd voor een korte pauze.\n"
             "Nog {} trials te gaan.\n\n\n"
-            "-- Druk op de spatiebalk om verder te gaan --".format(constants.NBREAK_TRIALS - trials_done),
+            "-- Druk op de spatiebalk om verder te gaan --".format(constants.NTRIALS - trials_done),
             fontsize=24)
 
-        self._play_text_screen(self.break_screen)
+        self._play_screen_until_spacebar_press(self.break_screen)
 
     def __serialize_data_to_csv(self):
         file_name = "ppt_{}.csv".format(self.subject)
@@ -130,17 +140,17 @@ class Experiment:
                     outfile.write("{},".format(item))
                 outfile.write("\n")
 
-    def _play_text_screen(self, this_screen):
+    def _play_screen_until_spacebar_press(self, this_screen):
         self.disp.fill(this_screen)
         self.disp.show()
         self.kb_space.get_key()
 
-    def _play_trial(self, trialcounter, practice=False):
+    def _play_trial(self, trialcounter, set_size_list=None, practice=False):
         t1, t2, t3, t4 = constants.PAUSES
         stimulus_container = self.experiment_screen.screen[:]
 
-        # background is first stimulus
-        set_size = np.random.choice(constants.SET_SIZES) + 1
+        set_size = self._determine_set_size(set_size_list, trialcounter)
+
         change_trial = True
         if np.random.random_sample() < 0.5:
             change_trial = False
@@ -153,7 +163,7 @@ class Experiment:
         self._scramble_stimuli()
 
         print("\tStarting trial %s" % trialcounter)
-        self.__show_empty_screen(t1)
+        self.__show_empty_screen(t1 + np.random.uniform(0, 1000))
         self.__show_experiment_screen(t2)
         self.__show_mask(t3)
         if change_trial:
@@ -166,11 +176,17 @@ class Experiment:
         self.__wait_for_trial_response()
 
         print("\tFinished trial %s" % trialcounter)
-
-        self.experiment_screen.screen = stimulus_container[:]
-
         trial_correct = (self.responseKey == 'a' and not change_trial) or \
                         (self.responseKey == 'l' and change_trial)
+
+        if practice:
+            self.experiment_screen.screen = stimulus_container[:]
+            self.experiment_screen.draw_text(
+                "Goed" if trial_correct else "Fout", fontsize=24)
+            self.experiment_screen.draw_text("\n\nDruk op de spatiebalk om verder te gaan", fontsize=24)
+            self._play_screen_until_spacebar_press(self.experiment_screen)
+
+        self.experiment_screen.screen = stimulus_container[:]
 
         self.output.append([self.subject,
                             self.responseKey,
@@ -179,6 +195,22 @@ class Experiment:
                             change_trial,
                             practice,
                             set_size])
+
+    @staticmethod
+    def _determine_set_size(set_size_list, trialcounter):
+        # the background counts as one stimulus, so 1 is added
+        random_set_size = np.random.choice(constants.SET_SIZES) + 1
+
+        # if no trial list is given, pick a random set size
+        if set_size_list is None:
+            set_size = random_set_size
+        # get a random set size if the set size list is shorter than the current trial index
+        elif len(set_size_list) <= trialcounter + 1:
+            set_size = random_set_size
+        # else pick a set size from the set size list
+        else:
+            set_size = set_size_list[trialcounter]
+        return set_size
 
     def __show_empty_screen(self, duration):
         self.disp.fill()
@@ -256,7 +288,6 @@ class Experiment:
     def __wait_for_trial_response(self):
         starttime = libtime.get_time()
         k, t = self.kb_input.get_key(flush=True)
-        libtime.pause(np.random.uniform(800, 1400))
 
         self.responseKey = k
         self.responseTime = libtime.get_time() - starttime
@@ -264,4 +295,4 @@ class Experiment:
 
 if __name__ == "__main__":
     experiment = Experiment()
-    experiment.start_experiment(override_trials=15)
+    experiment.start_experiment(override_trials=10)

@@ -5,10 +5,10 @@ import tools as va
 
 # device constants
 DIR = os.path.dirname(__file__)
-DATADIR = os.path.join(DIR, 'data')
+DATADIR = os.path.join(DIR, "data")
 LOGFILE = os.path.join(DATADIR)
 
-DISPTYPE = 'psychopy'
+DISPTYPE = "psychopy"
 DISPSIZE = (1280, 720)
 SCREENSIZE = (60.7, 35)
 SCREENDIST = 70
@@ -17,7 +17,7 @@ BGC = (0, 0, 0)
 FGC = (255, 255, 255)
 TEXTSIZE = 24
 
-TRACKERTYPE = 'eyelink'
+TRACKERTYPE = "eyelink"
 EYELINKCALBEEP = False
 DUMMYMODE = True
 

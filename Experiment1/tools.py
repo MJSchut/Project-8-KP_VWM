@@ -29,15 +29,15 @@ def poltocart(rho, phi):
 
 def angle_to_px(angle):
     """Convert visual angle and return pixels, requires constants.py."""
-    SCREENSIZE = constants.SCREENSIZE       # Size of screen
-    DISPSIZE = constants.DISPSIZE           # Screen resolution
-    SCREENDIST = constants.SCREENDIST       # Distance of screen in cm
+    SCREENSIZE = constants.SCREENSIZE  # Size of screen
+    DISPSIZE = constants.DISPSIZE  # Screen resolution
+    SCREENDIST = constants.SCREENDIST  # Distance of screen in cm
 
     h = SCREENSIZE[1]
     d = SCREENDIST
     r = DISPSIZE[1]
 
-    deg_per_px = degrees(atan2(.5*h, d)) / (.5*r)
+    deg_per_px = degrees(atan2(0.5 * h, d)) / (0.5 * r)
 
     size_in_px = angle / deg_per_px
     return size_in_px
@@ -45,15 +45,15 @@ def angle_to_px(angle):
 
 def px_to_angle(px):
     """Convert pixels to visual angle, requires constants.py."""
-    SCREENSIZE = constants.SCREENSIZE       # Size of screen
-    DISPSIZE = constants.DISPSIZE           # Screen resolution
-    SCREENDIST = constants.SCREENDIST       # Distance of screen in cm
+    SCREENSIZE = constants.SCREENSIZE  # Size of screen
+    DISPSIZE = constants.DISPSIZE  # Screen resolution
+    SCREENDIST = constants.SCREENDIST  # Distance of screen in cm
 
     h = SCREENSIZE[1]
     d = SCREENDIST
     r = DISPSIZE[1]
 
-    deg_per_px = degrees(atan2(.5*h, d)) / (.5*r)
+    deg_per_px = degrees(atan2(0.5 * h, d)) / (0.5 * r)
     size_in_deg = px * deg_per_px
 
     return size_in_deg

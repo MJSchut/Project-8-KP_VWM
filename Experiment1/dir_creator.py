@@ -1,4 +1,4 @@
-'''Check if directory exists, if not, create it'''
+"""Check if directory exists, if not, create it"""
 import os
 
 

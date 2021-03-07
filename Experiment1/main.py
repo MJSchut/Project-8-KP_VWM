@@ -3,15 +3,15 @@
 from init_subj import InitSubject
 from experiment import Experiment
 
-print ("main.py was started...")
+print("main.py was started...")
 infoSubject = InitSubject()
-print ("Subject info entered succesfully!")
+print("Subject info entered succesfully!")
 
-print ("Preparing experiment...")
+print("Preparing experiment...")
 experiment = Experiment(infoSubject.expInfo)
-print ("Preparations are complete!")
+print("Preparations are complete!")
 
-print ("Starting experiment")
+print("Starting experiment")
 experiment.start_practice()
 experiment.start_experiment()
-print ("Experiment is complete")
+print("Experiment is complete")

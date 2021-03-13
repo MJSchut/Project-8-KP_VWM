@@ -216,7 +216,9 @@ class Experiment:
         )
 
         if practice:
-            self.experiment_screen.screen = stimulus_container[:]
+            self.experiment_screen.draw_rect(
+                color=(0,0,0), x=0, y=constants.DISPSIZE[1]/2 - 50, w=constants.DISPSIZE[0], h=150, fill=True
+            )
             self.experiment_screen.draw_text(
                 "Goed" if trial_correct else "Fout", fontsize=24
             )

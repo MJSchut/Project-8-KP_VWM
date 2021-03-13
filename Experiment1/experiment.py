@@ -93,7 +93,7 @@ class Experiment:
 
     def __set_up_input(self):
         self.kb_space = libinput.Keyboard(keylist=["space", "escape"], timeout=None)
-        self.kb_input = libinput.Keyboard(keylist=["w", "n", "escape"], timeout=None)
+        self.kb_input = libinput.Keyboard(keylist=["w", "n", "p", "escape"], timeout=None)
 
     def __set_up_output(self):
         # Fair warning, if you plan to use a LOT of trials. Don't use the python list like
@@ -132,16 +132,21 @@ class Experiment:
         set_size_list = [x + 1 for x in set_size_list]
 
         self._play_screen_until_spacebar_press(self.intro_screen)
+        redo = 0
         for x in range(
             constants.NTRIALS if override_trials is None else override_trials
         ):
-            self._play_trial(x, set_size_list)
+            succes = self._play_trial(x, set_size_list)
 
             if (
                 x > 0
                 and x % constants.NBREAK_TRIALS == 0
                 and x != constants.NTRIALS - 1
             ):
+                self._take_a_break(x)
+
+            elif not succes:
+                np.random.shuffle(set_size_list)
                 self._take_a_break(x)
 
         self.__serialize_data_to_csv()
@@ -210,6 +215,10 @@ class Experiment:
         self.__show_experiment_screen(0)
         self.__wait_for_trial_response()
 
+        if self.responseKey == 'p':
+            self.experiment_screen.screen = stimulus_container[:]
+            return False
+
         print("\tFinished trial %s" % trialcounter)
         trial_correct = (self.responseKey == "n" and not change_trial) or (
             self.responseKey == "w" and change_trial
@@ -240,6 +249,7 @@ class Experiment:
                 set_size,
             ]
         )
+        return True
 
     @staticmethod
     def _determine_set_size(set_size_list, trialcounter):

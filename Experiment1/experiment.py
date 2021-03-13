@@ -93,7 +93,9 @@ class Experiment:
 
     def __set_up_input(self):
         self.kb_space = libinput.Keyboard(keylist=["space", "escape"], timeout=None)
-        self.kb_input = libinput.Keyboard(keylist=["w", "n", "p", "escape"], timeout=None)
+        self.kb_input = libinput.Keyboard(
+            keylist=["w", "n", "p", "escape"], timeout=None
+        )
 
     def __set_up_output(self):
         # Fair warning, if you plan to use a LOT of trials. Don't use the python list like
@@ -184,7 +186,7 @@ class Experiment:
         self.disp.fill(this_screen)
         self.disp.show()
         k, _ = self.kb_space.get_key()
-        if k == 'escape':
+        if k == "escape":
             self.exit_program()
 
     def _play_trial(self, trialcounter, set_size_list=None, practice=False):
@@ -217,7 +219,7 @@ class Experiment:
         self.__show_experiment_screen(0)
         self.__wait_for_trial_response()
 
-        if self.responseKey == 'p':
+        if self.responseKey == "p":
             self.experiment_screen.screen = stimulus_container[:]
             return False
 
@@ -228,7 +230,12 @@ class Experiment:
 
         if practice:
             self.experiment_screen.draw_rect(
-                color=(0,0,0), x=0, y=constants.DISPSIZE[1]/2 - 50, w=constants.DISPSIZE[0], h=150, fill=True
+                color=(0, 0, 0),
+                x=0,
+                y=constants.DISPSIZE[1] / 2 - 50,
+                w=constants.DISPSIZE[0],
+                h=150,
+                fill=True,
             )
             self.experiment_screen.draw_text(
                 "Goed" if trial_correct else "Fout", fontsize=24
@@ -351,12 +358,13 @@ class Experiment:
         k, t = self.kb_input.get_key(flush=True)
 
         self.responseKey = k
-        if self.responseKey == 'escape':
+        if self.responseKey == "escape":
             self.exit_program()
         self.responseTime = libtime.get_time() - starttime
 
     def exit_program(self):
         from psychopy import core
+
         self.__serialize_data_to_csv()
         core.quit()
 

@@ -6,7 +6,7 @@ import tools as va
 # device constants
 # base directory
 DIR = os.path.dirname(__file__)
-#where data is stored
+# where data is stored
 DATADIR = os.path.join(DIR, "data")
 
 # which back-end should pygaze use
@@ -47,13 +47,13 @@ NPRACTICE_TRIALS = 10
 NTRIALS = 100
 # how many trials before taking a break
 NBREAK_TRIALS = 25
-# how many stimuli does the participant need to remember. 
-# make sure this is a list. 
+# how many stimuli does the participant need to remember.
+# make sure this is a list.
 # if you go too high, stimuli may start overlapping
 SET_SIZES = [2, 3, 4, 6, 8]
 
 # this is used to set the set sizes in the practice trials
-# e.g. the first practice trial uses 2 stimuli, the second 2, the third 4 etc. 
+# e.g. the first practice trial uses 2 stimuli, the second 2, the third 4 etc.
 # if the length of this list is shorter than the number of practice trials, it'll pick random set sizes after
 # exausting this list
 PRACTICE_SET_SIZES = [2, 2, 4, 4, 6, 6, 8, 8]
@@ -67,7 +67,7 @@ BAR_RHOS = [va.angle_to_px(4.0), va.angle_to_px(7.0), va.angle_to_px(10.0)]
 # distance from the vertical meridian (in degrees) that a stimulus can appear at (polar coordinates)
 BAR_PHIS = [0, 60, 120, 180, 240, 300]
 
-# pauses after each phase of the experiment. e.g. the first number is the number of milliseconds before the first stimulus 
+# pauses after each phase of the experiment. e.g. the first number is the number of milliseconds before the first stimulus
 # is shown on the screen
 PAUSES = [300, 1000, 300, 500]
 

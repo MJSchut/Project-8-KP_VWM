@@ -48,7 +48,7 @@ class InitSubject:
 
             with open(file_location, "w") as outfile:
                 for key in self.expInfo.keys():
-                    outfile.write('{},{}\n'.format(key, self.expInfo.get(key)))
+                    outfile.write("{},{}\n".format(key, self.expInfo.get(key)))
         else:
             core.quit()
 

@@ -132,22 +132,25 @@ class Experiment:
         set_size_list = [x + 1 for x in set_size_list]
 
         self._play_screen_until_spacebar_press(self.intro_screen)
-        redo = 0
-        for x in range(
-            constants.NTRIALS if override_trials is None else override_trials
-        ):
-            succes = self._play_trial(x, set_size_list)
+        total_trials = constants.NTRIALS if override_trials is None else override_trials
+        trials_completed = 0
+
+        while trials_completed < total_trials:
+            succes = self._play_trial(trials_completed, set_size_list)
 
             if (
-                x > 0
-                and x % constants.NBREAK_TRIALS == 0
-                and x != constants.NTRIALS - 1
+                trials_completed > 0
+                and trials_completed % constants.NBREAK_TRIALS == 0
+                and trials_completed != constants.NTRIALS - 1
             ):
-                self._take_a_break(x)
+                self._take_a_break(trials_completed)
 
             elif not succes:
                 np.random.shuffle(set_size_list)
-                self._take_a_break(x)
+                self._take_a_break(trials_completed)
+
+            if succes:
+                trials_completed += 1
 
         self.__serialize_data_to_csv()
         self._play_screen_until_spacebar_press(self.end_screen)
@@ -182,8 +185,7 @@ class Experiment:
         self.disp.show()
         k, _ = self.kb_space.get_key()
         if k == 'escape':
-            from psychopy import core
-            core.quit()
+            self.exit_program()
 
     def _play_trial(self, trialcounter, set_size_list=None, practice=False):
         t1, t2, t3, t4 = constants.PAUSES
@@ -246,7 +248,7 @@ class Experiment:
                 trial_correct,
                 change_trial,
                 practice,
-                set_size,
+                set_size - 1,
             ]
         )
         return True
@@ -350,9 +352,13 @@ class Experiment:
 
         self.responseKey = k
         if self.responseKey == 'escape':
-            from psychopy import core
-            core.quit()
+            self.exit_program()
         self.responseTime = libtime.get_time() - starttime
+
+    def exit_program(self):
+        from psychopy import core
+        self.__serialize_data_to_csv()
+        core.quit()
 
 
 if __name__ == "__main__":

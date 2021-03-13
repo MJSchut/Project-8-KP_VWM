@@ -36,7 +36,7 @@ class InitSubject:
         )
 
         if dlg.OK:
-            file_name = "ppt_data_{}.json".format(self.expInfo.get("Participant"))
+            file_name = "ppt_data_{}.csv".format(self.expInfo.get("Participant"))
             make_dir(constants.DATADIR)
             file_location = os.path.join(constants.DATADIR, file_name)
 
@@ -47,7 +47,8 @@ class InitSubject:
                 print("deze proefpersoon bestaat al, programma wordt afgesloten")
 
             with open(file_location, "w") as outfile:
-                json.dump(self.expInfo, outfile)
+                for key in self.expInfo.keys():
+                    outfile.write("{},{}\n".format(key, self.expInfo.get(key)))
         else:
             core.quit()
 

@@ -40,9 +40,9 @@ class Experiment:
             "Daarna verschijnt er kort een scherm met ruis.\n"
             "Tot slot krijg je nogmaals het scherm met balkjes te zien.\n\n"
             "Na een moment verschijnt er een rood vierkant rond een van de balkjes.\n "
-            "Geef met de 'a' en 'l' toets aan of het balkje veranderd is.\n\n"
-            "Druk op 'a' als het balkje NIET veranderd is.\n "
-            "Druk op 'l' als het balkje wel veranderd is.\n"
+            "Geef met de 'w' en 'n' toets aan of het balkje veranderd is.\n\n"
+            "Druk op 'n' als het balkje (N)iet veranderd is.\n "
+            "Druk op 'w' als het balkje (W)el veranderd is.\n"
             "Je krijgt nu eerst {} oefenrondes met feedback aan het eind van iedere ronde.\n\n\n"
             "-- druk op de spatiebalk om te beginnen --".format(
                 constants.NPRACTICE_TRIALS
@@ -55,7 +55,7 @@ class Experiment:
             "INSTRUCTIES\n\n"
             "Nu volgen de echte trials.\n"
             "Je hoeft nu niet meer na iedere trial op de spatiebalk te drukken\n"
-            "Probeer snel en correct te antwoorden, iedere {} trials krijg je de kans voor een pauze.\n"
+            "Probeer snel en correct te antwoorden, iedere {} trials krijg je de tijd voor een pauze.\n"
             "Je krijgt {} trials in totaal.\n\n\n"
             "-- Druk op de spatiebalk om verder te gaan --".format(
                 constants.NBREAK_TRIALS, constants.NTRIALS
@@ -92,8 +92,10 @@ class Experiment:
             self.experiment_screen.screen.append(rect)
 
     def __set_up_input(self):
-        self.kb_space = libinput.Keyboard(keylist=["space"], timeout=None)
-        self.kb_input = libinput.Keyboard(keylist=["a", "l"], timeout=None)
+        self.kb_space = libinput.Keyboard(keylist=["space", "escape"], timeout=None)
+        self.kb_input = libinput.Keyboard(
+            keylist=["w", "n", "p", "escape"], timeout=None
+        )
 
     def __set_up_output(self):
         # Fair warning, if you plan to use a LOT of trials. Don't use the python list like
@@ -132,17 +134,25 @@ class Experiment:
         set_size_list = [x + 1 for x in set_size_list]
 
         self._play_screen_until_spacebar_press(self.intro_screen)
-        for x in range(
-            constants.NTRIALS if override_trials is None else override_trials
-        ):
-            self._play_trial(x, set_size_list)
+        total_trials = constants.NTRIALS if override_trials is None else override_trials
+        trials_completed = 0
+
+        while trials_completed < total_trials:
+            succes = self._play_trial(trials_completed, set_size_list)
+
+            if succes:
+                trials_completed += 1
 
             if (
-                x > 0
-                and x % constants.NBREAK_TRIALS == 0
-                and x != constants.NTRIALS - 1
+                trials_completed > 0
+                and trials_completed % constants.NBREAK_TRIALS == 0
+                and trials_completed != constants.NTRIALS - 1
             ):
-                self._take_a_break(x)
+                self._take_a_break(trials_completed)
+
+            elif not succes:
+                np.random.shuffle(set_size_list)
+                self._take_a_break(trials_completed)
 
         self.__serialize_data_to_csv()
         self._play_screen_until_spacebar_press(self.end_screen)
@@ -175,7 +185,9 @@ class Experiment:
     def _play_screen_until_spacebar_press(self, this_screen):
         self.disp.fill(this_screen)
         self.disp.show()
-        self.kb_space.get_key()
+        k, _ = self.kb_space.get_key()
+        if k == "escape":
+            self.exit_program()
 
     def _play_trial(self, trialcounter, set_size_list=None, practice=False):
         t1, t2, t3, t4 = constants.PAUSES
@@ -207,13 +219,24 @@ class Experiment:
         self.__show_experiment_screen(0)
         self.__wait_for_trial_response()
 
+        if self.responseKey == "p":
+            self.experiment_screen.screen = stimulus_container[:]
+            return False
+
         print("\tFinished trial %s" % trialcounter)
-        trial_correct = (self.responseKey == "a" and not change_trial) or (
-            self.responseKey == "l" and change_trial
+        trial_correct = (self.responseKey == "n" and not change_trial) or (
+            self.responseKey == "w" and change_trial
         )
 
         if practice:
-            self.experiment_screen.screen = stimulus_container[:]
+            self.experiment_screen.draw_rect(
+                color=(0, 0, 0),
+                x=0,
+                y=constants.DISPSIZE[1] / 2 - 50,
+                w=constants.DISPSIZE[0],
+                h=150,
+                fill=True,
+            )
             self.experiment_screen.draw_text(
                 "Goed" if trial_correct else "Fout", fontsize=24
             )
@@ -232,9 +255,10 @@ class Experiment:
                 trial_correct,
                 change_trial,
                 practice,
-                set_size,
+                set_size - 1,
             ]
         )
+        return True
 
     @staticmethod
     def _determine_set_size(set_size_list, trialcounter):
@@ -334,7 +358,15 @@ class Experiment:
         k, t = self.kb_input.get_key(flush=True)
 
         self.responseKey = k
+        if self.responseKey == "escape":
+            self.exit_program()
         self.responseTime = libtime.get_time() - starttime
+
+    def exit_program(self):
+        from psychopy import core
+
+        self.__serialize_data_to_csv()
+        core.quit()
 
 
 if __name__ == "__main__":

@@ -138,6 +138,9 @@ class Experiment:
         while trials_completed < total_trials:
             succes = self._play_trial(trials_completed, set_size_list)
 
+            if succes:
+                trials_completed += 1
+
             if (
                 trials_completed > 0
                 and trials_completed % constants.NBREAK_TRIALS == 0
@@ -148,9 +151,6 @@ class Experiment:
             elif not succes:
                 np.random.shuffle(set_size_list)
                 self._take_a_break(trials_completed)
-
-            if succes:
-                trials_completed += 1
 
         self.__serialize_data_to_csv()
         self._play_screen_until_spacebar_press(self.end_screen)

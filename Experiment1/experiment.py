@@ -55,7 +55,7 @@ class Experiment:
             "INSTRUCTIES\n\n"
             "Nu volgen de echte trials.\n"
             "Je hoeft nu niet meer na iedere trial op de spatiebalk te drukken\n"
-            "Probeer snel en correct te antwoorden, iedere {} trials krijg je de kans voor een pauze.\n"
+            "Probeer snel en correct te antwoorden, iedere {} trials krijg je de tijd voor een pauze.\n"
             "Je krijgt {} trials in totaal.\n\n\n"
             "-- Druk op de spatiebalk om verder te gaan --".format(
                 constants.NBREAK_TRIALS, constants.NTRIALS

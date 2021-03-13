@@ -62,7 +62,7 @@ PRACTICE_SET_SIZES = [2, 2, 4, 4, 6, 6, 8, 8]
 BAR_ORI = [0, 30, 60, 90, 120, 150]
 
 # distance from the center of the screen that a stimulus can appear at (polar coordinates)
-BAR_RHOS = [va.angle_to_px(5.0), va.angle_to_px(9.0), va.angle_to_px(13.0)]
+BAR_RHOS = [va.angle_to_px(4.0), va.angle_to_px(7.0), va.angle_to_px(10.0)]
 
 # distance from the vertical meridian (in degrees) that a stimulus can appear at (polar coordinates)
 BAR_PHIS = [0, 60, 120, 180, 240, 300]

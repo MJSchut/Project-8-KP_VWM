@@ -40,9 +40,9 @@ class Experiment:
             "Daarna verschijnt er kort een scherm met ruis.\n"
             "Tot slot krijg je nogmaals het scherm met balkjes te zien.\n\n"
             "Na een moment verschijnt er een rood vierkant rond een van de balkjes.\n "
-            "Geef met de 'a' en 'l' toets aan of het balkje veranderd is.\n\n"
-            "Druk op 'a' als het balkje NIET veranderd is.\n "
-            "Druk op 'l' als het balkje wel veranderd is.\n"
+            "Geef met de 'w' en 'n' toets aan of het balkje veranderd is.\n\n"
+            "Druk op 'n' als het balkje (N)iet veranderd is.\n "
+            "Druk op 'w' als het balkje (W)el veranderd is.\n"
             "Je krijgt nu eerst {} oefenrondes met feedback aan het eind van iedere ronde.\n\n\n"
             "-- druk op de spatiebalk om te beginnen --".format(
                 constants.NPRACTICE_TRIALS
@@ -92,8 +92,8 @@ class Experiment:
             self.experiment_screen.screen.append(rect)
 
     def __set_up_input(self):
-        self.kb_space = libinput.Keyboard(keylist=["space"], timeout=None)
-        self.kb_input = libinput.Keyboard(keylist=["a", "l"], timeout=None)
+        self.kb_space = libinput.Keyboard(keylist=["space", "escape"], timeout=None)
+        self.kb_input = libinput.Keyboard(keylist=["w", "n", "escape"], timeout=None)
 
     def __set_up_output(self):
         # Fair warning, if you plan to use a LOT of trials. Don't use the python list like
@@ -175,7 +175,10 @@ class Experiment:
     def _play_screen_until_spacebar_press(self, this_screen):
         self.disp.fill(this_screen)
         self.disp.show()
-        self.kb_space.get_key()
+        k, _ = self.kb_space.get_key()
+        if k == 'escape':
+            from psychopy import core
+            core.quit()
 
     def _play_trial(self, trialcounter, set_size_list=None, practice=False):
         t1, t2, t3, t4 = constants.PAUSES
@@ -208,8 +211,8 @@ class Experiment:
         self.__wait_for_trial_response()
 
         print("\tFinished trial %s" % trialcounter)
-        trial_correct = (self.responseKey == "a" and not change_trial) or (
-            self.responseKey == "l" and change_trial
+        trial_correct = (self.responseKey == "n" and not change_trial) or (
+            self.responseKey == "w" and change_trial
         )
 
         if practice:
@@ -334,6 +337,9 @@ class Experiment:
         k, t = self.kb_input.get_key(flush=True)
 
         self.responseKey = k
+        if self.responseKey == 'escape':
+            from psychopy import core
+            core.quit()
         self.responseTime = libtime.get_time() - starttime
 
 

@@ -41,7 +41,7 @@ opensesame-extension-osf==1.2.1
 packaging==20.9
 pandas==1.2.3
 parso==0.8.1
-Pillow==8.1.1
+Pillow==8.3.2
 proglog==0.1.9
 psutil==5.8.0
 PsychoPy==2021.1.1

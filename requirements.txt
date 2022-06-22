@@ -34,7 +34,7 @@ moviepy==1.0.3
 msgpack==1.0.2
 msgpack-numpy==0.4.7.1
 numexpr==2.7.3
-numpy==1.20.1
+numpy==1.22.0
 oauthlib==3.1.0
 openpyxl==3.0.6
 opensesame-extension-osf==1.2.1
